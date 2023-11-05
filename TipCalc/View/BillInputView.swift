@@ -5,7 +5,8 @@
 //  Created by Anmol Kalra on 02/11/23.
 //
 
-import Foundation
+import Combine
+import CombineCocoa
 import UIKit
 
 class BillInputView: UIView {
@@ -55,13 +56,28 @@ class BillInputView: UIView {
 		return textField
 	}()
 	
+	private let billSubject: PassthroughSubject<Double, Never> = .init()
+	
+	var valuePublisher: AnyPublisher<Double, Never> {
+		return billSubject.eraseToAnyPublisher()
+	}
+	
+	private var cancellables = Set<AnyCancellable>()
+	
 	init() {
 		super.init(frame: .zero)
 		layout()
+		observe()
 	}
 	
 	required init?(coder: NSCoder) {
 		fatalError("init(coder:) has not been implemented")
+	}
+	
+	private func observe() {
+		textField.textPublisher.sink { [unowned self] text in
+			billSubject.send(text?.doubleValue ?? 0)
+		}.store(in: &cancellables)
 	}
 	
 	private func layout() {

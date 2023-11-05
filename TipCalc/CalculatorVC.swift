@@ -5,6 +5,7 @@
 //  Created by Anmol Kalra on 02/11/23.
 //
 
+import Combine
 import SnapKit
 import UIKit
 
@@ -31,9 +32,22 @@ class CalculatorVC: UIViewController {
 		return stackView
 	}()
 	
+	private let vm = CalculatorVM()
+	private var cancellables = Set<AnyCancellable>()
+	
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		layout()
+		bind()
+	}
+	
+	private func bind() {
+		let input = CalculatorVM.Input(billPublisher: billInputView.valuePublisher, tipPublisher: tipInputView.valuePublisher, splitPublisher: Just(5).eraseToAnyPublisher())
+		
+		let output = vm.transform(input: input)
+		output.updateViewPublisher.sink { result in
+			dump(result)
+		}.store(in: &cancellables)
 	}
 	
 	func layout() {
