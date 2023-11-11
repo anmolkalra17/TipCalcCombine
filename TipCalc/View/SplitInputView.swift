@@ -65,6 +65,10 @@ class SplitInputView: UIView {
 		observe()
 	}
 	
+	func reset() {
+		splitSubject.send(1)
+	}
+	
 	required init?(coder: NSCoder) {
 		fatalError("init(coder:) has not been implemented")
 	}

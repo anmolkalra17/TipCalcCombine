@@ -70,6 +70,11 @@ class BillInputView: UIView {
 		observe()
 	}
 	
+	func reset() {
+		textField.text = nil
+		billSubject.send(0)
+	}
+	
 	required init?(coder: NSCoder) {
 		fatalError("init(coder:) has not been implemented")
 	}

@@ -96,6 +96,10 @@ class TipInputView: UIView {
 		observe()
 	}
 	
+	func reset() {
+		tipSubject.send(.none)
+	}
+	
 	required init?(coder: NSCoder) {
 		fatalError("init(coder:) has not been implemented")
 	}
