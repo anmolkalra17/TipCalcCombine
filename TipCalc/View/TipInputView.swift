@@ -185,11 +185,13 @@ class TipInputView: UIView {
 		button.addCornerRadius(radius: 8.0)
 		
 		let text = NSMutableAttributedString(string: tip.stringValue, attributes: [
-			.font: ThemeFont.bold(of: 20)
+			.font: ThemeFont.bold(of: 20),
+			.foregroundColor: UIColor.white
 		])
 		
 		text.addAttributes([
-			.font: ThemeFont.demiBold(of: 14)
+			.font: ThemeFont.demiBold(of: 14),
+			.foregroundColor: UIColor.white
 		], range: NSMakeRange(2, 1))
 		
 		button.setAttributedTitle(text, for: .normal)
