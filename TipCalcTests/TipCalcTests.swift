@@ -6,31 +6,93 @@
 //
 
 import XCTest
+import Combine
 @testable import TipCalc
 
 final class TipCalcTests: XCTestCase {
-
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-    }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
-
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
-    }
-
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
-    }
-
+	
+	//	sut -> System Under Test
+	private var sut: CalculatorVM!
+	private var cancellables: Set<AnyCancellable>!
+	
+	private let logoViewTapSubject = PassthroughSubject<Void, Never>()
+	
+	override func setUp() {
+		super.setUp()
+		sut = .init()
+		cancellables = .init()
+	}
+	
+	override func tearDown() {
+		super.tearDown()
+		sut = nil
+		cancellables = nil
+	}
+	
+	func testResultWithoutTipFor1Person() {
+		//	given
+		let bill = 100.0
+		let tip = Tip.none
+		let split = 1
+		//	when
+		let output = sut.transform(input: buildInput(bill: bill, tip: tip, split: split))
+		//	then
+		output.updateViewPublisher.sink { result in
+			XCTAssertEqual(result.amountPerPerson, 100)
+			XCTAssertEqual(result.totalBill, 100)
+			XCTAssertEqual(result.totalTip, 0)
+		}.store(in: &cancellables)
+	}
+	
+	func testResultWithoutTipFor2People() {
+		//	given
+		let bill = 100.0
+		let tip = Tip.none
+		let split = 2
+		//	when
+		let output = sut.transform(input: buildInput(bill: bill, tip: tip, split: split))
+		//	then
+		output.updateViewPublisher.sink { result in
+			XCTAssertEqual(result.amountPerPerson, 50)
+			XCTAssertEqual(result.totalBill, 100)
+			XCTAssertEqual(result.totalTip, 0)
+		}.store(in: &cancellables)
+	}
+	
+	func testResultWith10PercentTipFor2People() {
+		//	given
+		let bill = 100.0
+		let tip = Tip.tenPercent
+		let split = 2
+		//	when
+		let output = sut.transform(input: buildInput(bill: bill, tip: tip, split: split))
+		//	then
+		output.updateViewPublisher.sink { result in
+			XCTAssertEqual(result.amountPerPerson, 55)
+			XCTAssertEqual(result.totalBill, 110)
+			XCTAssertEqual(result.totalTip, 10)
+		}.store(in: &cancellables)
+	}
+	
+	func testResultWithCustomTipFor4People() {
+		//	given
+		let bill = 200.0
+		let tip = Tip.custom(value: 201)
+		let split = 4
+		//	when
+		let output = sut.transform(input: buildInput(bill: bill, tip: tip, split: split))
+		//	then
+		output.updateViewPublisher.sink { result in
+			XCTAssertEqual(result.amountPerPerson, 100.25)
+			XCTAssertEqual(result.totalBill, 401)
+			XCTAssertEqual(result.totalTip, 201)
+		}.store(in: &cancellables)
+	}
+	
+	private func buildInput(bill: Double, tip: Tip, split: Int) -> CalculatorVM.Input {
+		return .init(billPublisher: Just(bill).eraseToAnyPublisher(),
+					 tipPublisher: Just(tip).eraseToAnyPublisher(),
+					 splitPublisher: Just(split).eraseToAnyPublisher(),
+					 logoViewTapPublisher: logoViewTapSubject.eraseToAnyPublisher())
+	}
 }
