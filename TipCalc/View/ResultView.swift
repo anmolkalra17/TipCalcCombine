@@ -20,7 +20,7 @@ class ResultView: UIView {
 		label.textAlignment = .center
 		
 		let text = NSMutableAttributedString(
-			string: "$0",
+			string: "$ 0",
 			attributes: [
 				.font: ThemeFont.bold(of: 48),
 				.foregroundColor: ThemeColor.textColor
@@ -28,7 +28,8 @@ class ResultView: UIView {
 		)
 		
 		text.addAttributes([
-			.font: ThemeFont.bold(of: 24)
+			.font: ThemeFont.bold(of: 24),
+			.foregroundColor: ThemeColor.textColor
 		], range: NSMakeRange(0, 1))
 		
 		label.attributedText = text
@@ -56,15 +57,25 @@ class ResultView: UIView {
 		return stackView
 	}()
 	
+	private let totalBillView: AmountView = {
+		let view = AmountView(title: "Total bill", textAlignment: .left)
+		return view
+	}()
+	
+	private let totalTipView: AmountView = {
+		let view = AmountView(title: "Total tip", textAlignment: .right)
+		return view
+	}()
+	
 	private lazy var hStackView: UIStackView = {
 		let stackView = UIStackView(arrangedSubviews: [
-			AmountView(title: "Total bill", textAlignment: .left),
+			totalBillView,
 			UIView(),
-			AmountView(title: "Total tip", textAlignment: .right)
+			totalTipView
 		])
 		
 		stackView.axis = .horizontal
-		stackView.distribution = .fillEqually
+		stackView.distribution = .fillProportionally
 		return stackView
 	}()
 	
@@ -75,6 +86,22 @@ class ResultView: UIView {
 	
 	required init?(coder: NSCoder) {
 		fatalError("init(coder:) has not been implemented")
+	}
+	
+	func configure(result: CalcResult) {
+		let text = NSMutableAttributedString(string: result.amountPerPerson.currencyFormatted, attributes: [
+			.font: ThemeFont.bold(of: 48),
+			.foregroundColor: ThemeColor.textColor
+		])
+		
+		text.addAttributes([
+			.font: ThemeFont.bold(of: 24),
+			.foregroundColor: ThemeColor.textColor
+		], range: NSMakeRange(0, 1))
+		
+		amountPerPersonLabel.attributedText = text
+		totalBillView.configure(amount: result.totalBill)
+		totalTipView.configure(amount: result.totalTip)
 	}
 	
 	private func layout() {
