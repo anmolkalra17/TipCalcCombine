@@ -1,41 +1,62 @@
-#!/bin/bash
+pipeline {
+    agent any
 
-# Function to display an error message and exit
-function error_exit {
-    echo "Error: $1"
-    exit 1
+    environment {
+        GITHUB_TOKEN = credentials('your-github-token-id')
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                script {
+                    // Change to the desired branch
+                    checkout([$class: 'GitSCM', branches: [[name: '*/<branch_name>']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/your_username/your_repo.git']]])
+
+                    // Set GitHub credentials
+                    withCredentials([string(credentialsId: 'your-github-token-id', variable: 'GITHUB_TOKEN')]) {
+                        // Set GitHub repo URL
+                        def repoUrl = 'https://github.com/anmolkalra17/TipCalcCombine.git'
+                        sh "git remote set-url origin $repoUrl"                        
+                    }
+                }
+            }
+        }
+
+        stage('Clean') {
+            steps {
+                script {
+                    // Source the environment or any setup script
+                    sh "source ~/.bash_profile" // Update with your setup script if needed
+
+                    // Invoke fastlane to clean
+                    sh "fastlane clean" // Update with your fastlane command
+                }
+            }
+        }
+
+        stage('Code Signing') {
+            steps {
+                script {
+                    // Uncomment the following lines if code signing is needed
+                    sh "fastlane ios adhoc" // Update with your code signing command
+                }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                script {
+                    // Build using gym command in fastlane
+                    sh "fastlane ios build" // Update with your build command
+                }
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo 'Pipeline failed!'
+            // Add any necessary post-failure steps or notifications here
+        }
+    }
 }
-
-# Check if the branch parameter is provided
-if [ -z "$1" ]; then
-    error_exit "Branch parameter not provided. Usage: $0 <branch_name>"
-fi
-
-# Set GitHub repo and token
-repo_url="https://github.com/anmolkalra17/TipCalcCombine.git"
-github_token="${GITHUB_TOKEN}"
-
-# Check if GitHub token is provided
-if [ -z "$github_token" ]; then
-    error_exit "GitHub token not found. Set it as an environment variable in Jenkins."
-fi
-
-# Change to the desired branch
-git checkout "$1" || error_exit "Failed to checkout branch $1"
-
-# Set GitHub credentials
-git config credential.helper 'cache --timeout=300'
-git remote set-url origin "$repo_url" || error_exit "Failed to set remote URL"
-
-# Clean environment
-source ~/.bash_profile  # or any other script to set up your environment
-
-# Invoke fastlane to clean
-fastlane clean || error_exit "Failed to clean with fastlane"
-
-# Code signing (if required)
-# Uncomment the following lines if code signing is needed
-fastlane ios adhoc || error_exit "Failed to sign the code"
-
-# Build using gym command in fastlane
-fastlane ios build || error_exit "Failed to build with fastlane"
