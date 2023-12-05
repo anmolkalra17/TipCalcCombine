@@ -2,31 +2,31 @@ pipeline {
     agent any
 
     // environment {
-    //     GITHUB_TOKEN = credentials('your-github-token-id')
+    //     GITHUB_TOKEN = credentials('production')
     // }
 
     stages {
-        stage('Checkout') {
-            steps {
-                script {
-                    // Change to the desired branch
-                    checkout([$class: 'GitSCM', branches: [[name: '*/<branch_name>']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/anmolkalra17/TipCalcCombine.git']]])
+        // stage('Checkout') {
+        //     steps {
+        //         script {
+        //             // Change to the desired branch
+        //             checkout([$class: 'GitSCM', branches: [[name: '*/<branch_name>']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/anmolkalra17/TipCalcCombine.git']]])
 
-                    // Set GitHub credentials
-                    withCredentials([string(credentialsId: 'your-github-token-id', variable: 'GITHUB_TOKEN')]) {
-                        // Set GitHub repo URL
-                        def repoUrl = 'https://github.com/anmolkalra17/TipCalcCombine.git'
-                        sh "git remote set-url origin $repoUrl"                        
-                    }
-                }
-            }
-        }
+        //             // Set GitHub credentials
+        //             withCredentials([string(credentialsId: 'your-github-token-id', variable: 'GITHUB_TOKEN')]) {
+        //                 // Set GitHub repo URL
+        //                 def repoUrl = 'https://github.com/anmolkalra17/TipCalcCombine.git'
+        //                 sh "git remote set-url origin $repoUrl"                        
+        //             }
+        //         }
+        //     }
+        // }
 
         stage('Clean') {
             steps {
                 script {
                     // Source the environment or any setup script
-                    sh "source ~/.bash_profile" // Update with your setup script if needed
+                    // sh "source ~/.bash_profile" // Update with your setup script if needed
 
                     // Invoke fastlane to clean
                     sh "fastlane clean" // Update with your fastlane command
