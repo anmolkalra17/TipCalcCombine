@@ -10,7 +10,7 @@ pipeline {
             steps {
                 script {
                     // Change to the desired branch
-                    checkout([$class: 'GitSCM', branches: [[name: '*/<branch_name>']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/your_username/your_repo.git']]])
+                    checkout([$class: 'GitSCM', branches: [[name: '*/<branch_name>']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/anmolkalra17/TipCalcCombine.git']]])
 
                     // Set GitHub credentials
                     withCredentials([string(credentialsId: 'your-github-token-id', variable: 'GITHUB_TOKEN')]) {
